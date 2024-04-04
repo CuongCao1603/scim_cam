@@ -8,7 +8,8 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,7 +22,8 @@ public class ScimResource {
     private List<String> schemas= new ArrayList<>();
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String id;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Meta meta;
     public List<String> getSchemas() {
         return schemas;
     }
@@ -46,8 +48,7 @@ public class ScimResource {
         this.meta = mata;
     }
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Meta meta;
+
 
     public void addSchema(String schema){
         schemas.add(schema);

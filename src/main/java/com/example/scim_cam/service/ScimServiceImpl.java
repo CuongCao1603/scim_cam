@@ -109,7 +109,8 @@ public class ScimServiceImpl implements ScimService {
         ScimOktaIceUser scimOktaIceUser = new ScimOktaIceUser();
 
         // flat attributes
-        scimOktaIceUser.setId(user.getUuid());
+        scimOktaIceUser.setId(String.valueOf(user.getId()));
+        scimOktaIceUser.setUuid(user.getUuid());
         scimOktaIceUser.setUserName(user.getUserName());
         scimOktaIceUser.setActive(user.getActive());
 

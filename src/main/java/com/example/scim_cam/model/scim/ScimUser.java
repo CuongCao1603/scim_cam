@@ -17,6 +17,7 @@ public class ScimUser extends ScimResource{
      */
     public static final String SCHEMA_USER_CORE = SCHEMA_BASE  + ":core:2.0:User";
 
+    private String uuid;
     private boolean active;
     private String userName;
     private Name name;
