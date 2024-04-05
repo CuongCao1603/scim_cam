@@ -9,14 +9,15 @@ import java.util.List;
 @Setter
 @Getter
 @AllArgsConstructor
-@JsonPropertyOrder({"schemas", "id", "active", "userName","name","emails","groups","meta"})
+//@JsonPropertyOrder({"schemas", "id", "active", "userName","name","emails","groups","meta"})
+@JsonPropertyOrder({"schemas","id","uuid","meta","userName","name","active", "emails","groups"})
 public class ScimUser extends ScimResource{
     /**
      * The ScimUser class extends ScimResource class.
      * It contains the SCHEMA_USER_CORE string to store the Core Schema.
      */
     public static final String SCHEMA_USER_CORE = SCHEMA_BASE  + ":core:2.0:User";
-
+    private String id;
     private String uuid;
     private boolean active;
     private String userName;

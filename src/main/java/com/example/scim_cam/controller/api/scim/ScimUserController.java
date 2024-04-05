@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -47,15 +48,6 @@ public class ScimUserController extends ScimBaseController{
      * TODO: Implement the getUser method
      */
     @GetMapping("/{uuid}")
-//    public @ResponseBody ScimOktaIceUser getUser(@PathVariable String uuid) {
-//        //This is the line to delete
-//        return new ScimOktaIceUser();
-//        //Searches a Repository User by its uuid
-//
-//        //Returns the Repository User and convert it to a SCIM User.
-//
-//    }
-
     public @ResponseBody ResponseEntity<ScimOktaIceUser> getUser(@PathVariable String uuid) {
         User user = userRepository.findOneByUuid(uuid);
         if (user == null) {
@@ -70,50 +62,49 @@ public class ScimUserController extends ScimBaseController{
         return ResponseEntity.ok(scimUser);
     }
 
-//    @GetMapping
-//    public @ResponseBody ScimListResponse getUsers(@ModelAttribute ScimPageFilter scimPageFilter) {
-//        //GET STARTINDEX AND COUNT FOR PAGINATION
-//        PageRequest pageRequest =
-//                new PageRequest(scimPageFilter.getStartIndex() - 1, scimPageFilter.getCount());
-//
-//        Page<User> users = null;
-//
-//        //PARSE SEARCH FILTER
-//        Matcher match = scimPageFilter.parseFilter();
-//        if (match.find()) {
-//            String searchKeyName = match.group(1);
-//            String searchValue = match.group(2);
-//            //IF THERE'S A VALID FILTER, USE THE PROPER METHOD FOR USER SEARCH
-//            switch (searchKeyName) {
-//                case ScimPageFilter.USER_USERNAME:
-//                    users = userRepository.findByUsername(searchValue, pageRequest);
-//                    break;
-//                case ScimPageFilter.USER_ACTIVE:
-//                    users = userRepository.findByActive(Boolean.valueOf(searchValue), pageRequest);
-//                    break;
-//                case ScimPageFilter.USER_FIRST_NAME:
-//                    users = userRepository.findByFirstName(searchValue, pageRequest);
-//                    break;
-//                case ScimPageFilter.USER_LAST_NAME:
-//                    users = userRepository.findByLastName(searchValue, pageRequest);
-//                    break;
-//                default:
-//                    throw new HttpClientErrorException(HttpStatus.NOT_IMPLEMENTED, "Filter not implemented");
-//            }
-//        } else {
-//            //IF THERE'S NO FILTER, FIND ALL ENTRIES
-//            users = userRepository.findAll(pageRequest);
-//        }
-//
-//        /**
-//         * TODO: Complete the getUsers method
-//         */
-//        //Get a list of Repository Users from search and convert to a SCIM List Response
-//
-//
-//        //This is the line to delete
-//        return new ScimListResponse();
-//    }
+    @GetMapping
+    public @ResponseBody ScimListResponse getUsers(@ModelAttribute ScimPageFilter scimPageFilter) {
+        // Prepare pagination request. Uncomment the following line if sorting is needed.
+        PageRequest pageRequest = PageRequest.of(
+                scimPageFilter.getStartIndex() - 1,
+                scimPageFilter.getCount()
+                // , Sort.by(Sort.Direction.ASC, "userName") // Uncomment and adjust if sorting is needed
+        );
+
+        Page<User> users;
+
+        // Parse search filter
+        Matcher match = scimPageFilter.parseFilter();
+        if (match.find()) {
+            String searchKeyName = match.group(1);
+            String searchValue = match.group(2);
+            // Apply the filter based on the search key
+            switch (searchKeyName) {
+                case ScimPageFilter.USER_USERNAME:
+                    users = userRepository.findByUsername(searchValue, pageRequest);
+                    break;
+                case ScimPageFilter.USER_ACTIVE:
+                    users = userRepository.findByActive(Boolean.valueOf(searchValue), pageRequest);
+                    break;
+                case ScimPageFilter.USER_FIRST_NAME:
+                    users = userRepository.findByFirstName(searchValue, pageRequest);
+                    break;
+                case ScimPageFilter.USER_LAST_NAME:
+                    users = userRepository.findByLastName(searchValue, pageRequest);
+                    break;
+                default:
+                    throw new HttpClientErrorException(HttpStatus.NOT_IMPLEMENTED, "Filter not implemented");
+            }
+        } else {
+            // Find all users if there's no filter
+            users = userRepository.findAll(pageRequest);
+        }
+
+        // Convert Page<User> to ScimListResponse
+        return scimService.usersToListResponse(users.getContent(), scimPageFilter.getStartIndex(), scimPageFilter.getCount());
+    }
+
+
 
     /**
      * TODO: Implement the createUser method
@@ -135,20 +126,26 @@ public class ScimUserController extends ScimBaseController{
      * TODO: Implement the replaceUser method
      */
     @PutMapping("/{uuid}")
-    public @ResponseBody ScimOktaIceUser replaceUser(@RequestBody ScimUser scimUser, @PathVariable String uuid) {
-        //This is the line to delete
-        return new ScimOktaIceUser();
+    public ResponseEntity<ScimOktaIceUser> replaceUser(@RequestBody ScimUser scimUser, @PathVariable String uuid) {
+        User existingUser = userRepository.findOneByUuid(uuid);
+        if (existingUser == null) {
+            // If the user cannot be found, return 404 Not Found
+            return ResponseEntity.notFound().build();
+        }
 
-        //Finds the Repository User by uuid
+        // Convert the SCIM User to a Repository User format (this step might need customization)
+        User userWithUpdates = scimService.scimUserToUser(scimUser);
 
-        //Convert the SCIM User to a Repository User format if an existing Repository User can be found.
+        // Copy attribute values from userWithUpdates to the existing Repository User
+        copyUser(userWithUpdates, existingUser);
 
-        //Copy attribute values from userWithUpdates to the existing Repository User
+        // Save the updated user to the database
+        User updatedUser = userRepository.save(existingUser);
 
-        //Save the updated value to DB
+        // Convert the updated User entity to a ScimOktaIceUser and return it
+        ScimOktaIceUser scimOktaIceUser = scimService.userToScimOktaIceUser(updatedUser);
 
-        //Return the updated user information and convert it to a SCIM User
-
+        return ResponseEntity.ok(scimOktaIceUser);
     }
 
     /**

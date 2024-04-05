@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+//@NoArgsConstructor
 public class ScimListResponse extends ScimResource {
     //The ScimListResponse class has its own SCIM schema
     public static final String SCHEMA_LIST_RESPONE = "urn:ietf:params:scim:messages:2.0:ListResponse";
@@ -26,4 +26,9 @@ public class ScimListResponse extends ScimResource {
 
     @JsonProperty("Resources")
     private List<ScimResource> resources = new ArrayList<>();
+
+    public ScimListResponse(){
+        super();
+        getSchemas().add(SCHEMA_LIST_RESPONE);
+    }
 }
