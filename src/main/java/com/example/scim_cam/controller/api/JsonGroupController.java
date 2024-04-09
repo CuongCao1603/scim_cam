@@ -4,12 +4,13 @@ import com.example.scim_cam.model.Group;
 import com.example.scim_cam.repository.GroupRepository;
 import com.example.scim_cam.repository.UserRepository;
 import com.example.scim_cam.utils.JsonUtil;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Objects;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * REST API for group management

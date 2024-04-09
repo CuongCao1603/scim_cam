@@ -2,7 +2,7 @@ package com.example.scim_cam.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -20,6 +20,9 @@ import java.util.UUID;
 public class User {
 
     //BEGIN: USER ATTRIBUTES
+    // @Column(unique=true)
+    // private String secretKey; // Thêm thuộc tính secretKey
+    
     @Id
     @GeneratedValue
     private int id;
@@ -36,6 +39,8 @@ public class User {
     private String favoriteIceCream;
     private String employeeNumber;
     private String costCenter;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Account account; // Quan hệ 1:1 với Account
     @ManyToMany(mappedBy = "users")
     @JsonIgnore
     private List<Group> groups = new ArrayList<>();
